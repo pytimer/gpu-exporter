@@ -183,7 +183,7 @@ func newCollectorCommand() *cobra.Command {
 	flags := cmd.Flags()
 	flags.SetInterspersed(false)
 
-	flags.StringVar(&listenAddress, "web.listen-address", ":9100", "Address on which to expose metrics and web interface.")
+	flags.StringVar(&listenAddress, "web.listen-address", ":9470", "Address on which to expose metrics and web interface.")
 	flags.StringVar(&metricsPath, "web.path", "/metrics", "Path under which to expose metrics.")
 
 	return cmd
