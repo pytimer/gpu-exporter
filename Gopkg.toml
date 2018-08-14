@@ -34,8 +34,12 @@
   name = "github.com/golang/glog"
 
 [[constraint]]
-  branch = "master"
+  name = "github.com/prometheus/client_golang"
+  version = "0.8.0"
+
+[[constraint]]
   name = "github.com/spf13/cobra"
+  version = "0.0.3"
 
 [prune]
   go-tests = true

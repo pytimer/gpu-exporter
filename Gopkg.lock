@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:442a2adddbd6d274a0be75cc491057b9ec52a5fe5cd6f04ee9b88332935277b6"
+  digest = "1:36d1549972d1ebac59f3b15708485666761d8051f675776193ccb1be3cb6ea84"
   name = "github.com/NVIDIA/gpu-monitoring-tools"
   packages = ["bindings/go/nvml"]
   pruneopts = "UT"
-  revision = "a11f55f1889c2808901ccaba37af261ea21bd3ac"
+  revision = "f845d6bc7079f06e21a2776215aa2ae9b6037c86"
 
 [[projects]]
   branch = "master"
@@ -50,14 +50,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:d825c51f06c00049fbfbaba301a0009e33a252124857c5fb6a12b517b57ee8f2"
+  digest = "1:1bd84ab43883f0ef0129fb753f9fdabba3903eff922816aaaba8e6204fb3cde9"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/promhttp",
   ]
   pruneopts = "UT"
-  revision = "c317fb74746eac4fc65fe3909195f4cf67c5562a"
+  revision = "c5b7fccd204277076155f10851dad72b76a49317"
+  version = "v0.8.0"
 
 [[projects]]
   branch = "master"
@@ -93,20 +94,20 @@
   revision = "05ee40e3a273f7245e8777337fc7b46e533a9a92"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7c61fc53540b14b2a6619ae9497c3bee868a2aec5480390b909e5c168f0ef6ed"
+  digest = "1:872fa275c31e1f9db31d66fa9b1d4a7bb9a080ff184e6977da01f36bfbe07f11"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = "UT"
-  revision = "615425954c3b0d9485a7027d4d451fdcdfdee84e"
+  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
+  version = "v0.0.3"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9424f440bba8f7508b69414634aef3b2b3a877e522d8a4624692412805407bb7"
+  digest = "1:dab83a1bbc7ad3d7a6ba1a1cc1760f25ac38cdf7d96a5cdd55cd915a4f5ceaf9"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [solve-meta]
   analyzer-name = "dep"

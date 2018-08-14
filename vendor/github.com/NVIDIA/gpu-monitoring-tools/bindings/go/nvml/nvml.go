@@ -20,6 +20,39 @@ var (
 	ErrUnsupportedGPU     = errors.New("unsupported GPU device")
 )
 
+type ModeState uint
+
+const (
+	Enabled ModeState = iota
+	Disabled
+)
+
+func (m ModeState) String() string {
+	switch m {
+	case Enabled:
+		return "Enabled"
+	case Disabled:
+		return "Disabled"
+	}
+	return "N/A"
+}
+
+type Display struct {
+	Mode   ModeState
+	Active ModeState
+}
+
+type Accounting struct {
+	Mode       ModeState
+	BufferSize *uint
+}
+
+type DeviceMode struct {
+	DisplayInfo    Display
+	Persistence    ModeState
+	AccountingInfo Accounting
+}
+
 type ThrottleReason uint
 
 const (
@@ -60,22 +93,6 @@ func (r ThrottleReason) String() string {
 		return "No clocks throttling"
 	}
 	return "N/A"
-}
-
-type EnableState uint
-
-const (
-	EnableStateDisabled EnableState = 0
-	EnableStateEnabled  EnableState = 1
-)
-
-func (s EnableState) String() string {
-	if s == EnableStateDisabled {
-		return "Disabled"
-	} else if s == EnableStateEnabled {
-		return "Enabled"
-	}
-	return "Disabled"
 }
 
 type PerfState uint
@@ -165,6 +182,7 @@ type Device struct {
 	Path        string
 	Model       *string
 	Power       *uint
+	Memory      *uint64
 	CPUAffinity *uint
 	PCI         PCIInfo
 	Clocks      ClockInfo
@@ -191,13 +209,17 @@ type PCIStatusInfo struct {
 type ECCErrorsInfo struct {
 	L1Cache *uint64
 	L2Cache *uint64
-	Global  *uint64
+	Device  *uint64
+}
+
+type DeviceMemory struct {
+	Used *uint64
+	Free *uint64
 }
 
 type MemoryInfo struct {
-	GlobalTotal *uint64
-	GlobalUsed  *uint64
-	ECCErrors   ECCErrorsInfo
+	Global    DeviceMemory
+	ECCErrors ECCErrorsInfo
 }
 
 type ProcessInfo struct {
@@ -217,7 +239,6 @@ type DeviceStatus struct {
 	Processes   []ProcessInfo
 	Throttle    ThrottleReason
 	Performance PerfState
-	DisableMode EnableState
 }
 
 func assert(err error) {
@@ -290,6 +311,8 @@ func NewDevice(idx uint) (device *Device, err error) {
 	assert(err)
 	power, err := h.deviceGetPowerManagementLimit()
 	assert(err)
+	totalMem, _, err := h.deviceGetMemoryInfo()
+	assert(err)
 	busid, err := h.deviceGetPciInfo()
 	assert(err)
 	bar1, _, err := h.deviceGetBAR1MemoryInfo()
@@ -314,6 +337,7 @@ func NewDevice(idx uint) (device *Device, err error) {
 		Path:        path,
 		Model:       model,
 		Power:       power,
+		Memory:      totalMem,
 		CPUAffinity: &node,
 		PCI: PCIInfo{
 			BusID:     *busid,
@@ -383,7 +407,7 @@ func (d *Device) Status() (status *DeviceStatus, err error) {
 	assert(err)
 	udec, err := d.deviceGetDecoderUtilization()
 	assert(err)
-	total, mem, err := d.deviceGetMemoryInfo()
+	_, devMem, err := d.deviceGetMemoryInfo()
 	assert(err)
 	ccore, cmem, err := d.deviceGetClockInfo()
 	assert(err)
@@ -399,8 +423,6 @@ func (d *Device) Status() (status *DeviceStatus, err error) {
 	assert(err)
 	processInfo, err := d.deviceGetAllRunningProcesses()
 	assert(err)
-	displayMode, err := d.getDisplayMode()
-	assert(err)
 
 	status = &DeviceStatus{
 		Power:       power,
@@ -412,12 +434,11 @@ func (d *Device) Status() (status *DeviceStatus, err error) {
 			Decoder: udec, // %
 		},
 		Memory: MemoryInfo{
-			GlobalUsed:  mem,
-			GlobalTotal: total,
+			Global: devMem,
 			ECCErrors: ECCErrorsInfo{
 				L1Cache: el1,
 				L2Cache: el2,
-				Global:  emem,
+				Device:  emem,
 			},
 		},
 		Clocks: ClockInfo{
@@ -433,17 +454,10 @@ func (d *Device) Status() (status *DeviceStatus, err error) {
 		},
 		Throttle:    throttle,
 		Performance: perfState,
-		DisableMode: displayMode,
 		Processes:   processInfo,
 	}
 	if power != nil {
 		*status.Power /= 1000 // W
-	}
-	if mem != nil {
-		*status.Memory.GlobalUsed /= 1024 * 1024 // MiB
-	}
-	if total != nil {
-		*status.Memory.GlobalTotal /= 1024 * 1024 // MiB
 	}
 	if bar1 != nil {
 		*status.PCI.BAR1Used /= 1024 * 1024 // MiB
@@ -492,4 +506,28 @@ func (d *Device) GetGraphicsRunningProcesses() ([]uint, []uint64, error) {
 
 func (d *Device) GetAllRunningProcesses() ([]ProcessInfo, error) {
 	return d.handle.deviceGetAllRunningProcesses()
+}
+
+func (d *Device) GetDeviceMode() (mode *DeviceMode, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
+
+	display, err := d.getDisplayInfo()
+	assert(err)
+
+	p, err := d.getPeristenceMode()
+	assert(err)
+
+	accounting, err := d.getAccountingInfo()
+	assert(err)
+
+	mode = &DeviceMode{
+		DisplayInfo:    display,
+		Persistence:    p,
+		AccountingInfo: accounting,
+	}
+	return
 }

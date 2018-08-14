@@ -3,7 +3,10 @@ package main
 import (
 	goflag "flag"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/NVIDIA/gpu-monitoring-tools/bindings/go/nvml"
 	"github.com/golang/glog"
@@ -112,8 +115,8 @@ func (nc *NvidiaCollector) Collect(ch chan<- prometheus.Metric) {
 		name := device.Model
 		uuid := device.UUID
 
-		nc.memoryUsed.WithLabelValues(path, uuid, *name).Set(float64(*st.Memory.GlobalUsed))
-		nc.memoryTotal.WithLabelValues(path, uuid, *name).Set(float64(*st.Memory.GlobalTotal))
+		nc.memoryUsed.WithLabelValues(path, uuid, *name).Set(float64(*st.Memory.Global.Used))
+		nc.memoryTotal.WithLabelValues(path, uuid, *name).Set(float64(*device.Memory))
 		nc.powerUsage.WithLabelValues(path, uuid, *name).Set(float64(*st.Power))
 		nc.temperature.WithLabelValues(path, uuid, *name).Set(float64(*st.Temperature))
 
@@ -150,6 +153,9 @@ func newCollectorCommand() *cobra.Command {
 
 			prometheus.MustRegister(newNvidiaCollector())
 
+			shudownC := make(chan struct{})
+			go listenToSystemSignal(shudownC)
+
 			http.Handle(metricsPath, promhttp.Handler())
 			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(`<html>
@@ -161,7 +167,14 @@ func newCollectorCommand() *cobra.Command {
 						</html>`))
 			})
 
-			http.ListenAndServe(listenAddress, nil)
+			go func() {
+				http.ListenAndServe(listenAddress, nil)
+			}()
+
+			<-shudownC
+			glog.Info("GPU exporter shutdown completed.")
+			return
+
 		},
 	}
 
@@ -174,4 +187,21 @@ func newCollectorCommand() *cobra.Command {
 	flags.StringVar(&metricsPath, "web.path", "/metrics", "Path under which to expose metrics.")
 
 	return cmd
+}
+
+// listenToSystemSignal listen system signal and exit exporter.
+func listenToSystemSignal(stopC chan<- struct{}) {
+	glog.V(5).Info("Listen to system signal.")
+
+	signalChan := make(chan os.Signal, 1)
+	ignoreChan := make(chan os.Signal, 1)
+
+	signal.Notify(ignoreChan, syscall.SIGHUP)
+	signal.Notify(signalChan, os.Interrupt, os.Kill, syscall.SIGTERM)
+
+	select {
+	case sig := <-signalChan:
+		glog.V(3).Infof("GPU exporter shutdown by system signal: %s", sig)
+		stopC <- struct{}{}
+	}
 }
