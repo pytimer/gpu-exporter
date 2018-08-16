@@ -12,7 +12,7 @@ func main() {
 	rootCmd := &cobra.Command{
 		Use:     "gpu_exporter",
 		Short:   "GPU exporter collect node nvidia gpu metrics",
-		Long:    "GPU exporter collect node all nvidia gpu metrics expose to different backends, such as Influxdb/Prometheus",
+		Long:    "GPU exporter collect node all nvidia gpu metrics expose to Prometheus",
 		Version: version,
 	}
 	rootCmd.AddCommand(

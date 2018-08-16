@@ -6,7 +6,7 @@ repository:
 build:
   binaries:
     - name: gpu_exporter
-  flags: -tags 'netgo static_build'
+  flags: -a -tags 'netgo static_build'
   ldflags: |
     -X {{repoPath}}/main.Version={{.Version}}
 crossbuild:

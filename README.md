@@ -3,6 +3,19 @@ GPU Exporter
 
 This is a Prometheus Exporter for Collect Nvidia GPU metrics. It uses the Nvidia [NVML Go Bindings](https://github.com/NVIDIA/gpu-monitoring-tools), not call the `nvidia-smi` binary.
 
+## Build
+
+### images
+
+`docker build -t pytimer/gpu_exporter:1.0.0 .`
+
+### Pre required
+
+```
+# ls -l /lib/x86_64-linux-gnu | grep libdl
+-rw-r--r-- 1 root root   14640 Jan 14  2018 libdl-2.24.so
+lrwxrwxrwx 1 root root      13 Jan 14  2018 libdl.so.2 -> libdl-2.24.so
+```
 
 ## Running
 
