@@ -1,0 +1,54 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: gpu-exporter
+  namespace: kube-system
+  labels:
+    k8s-app: gpu-exporter
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: gpu-exporter
+    spec:
+      hostNetwork: true
+      containers:
+      - name: gpu-exporterr
+        image: pytimer/gpu_exporter:1.0.0
+        args: [
+          "run",
+          "-v", "5",
+          "--logtostderr",
+        ]
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 9470
+            name: exporter
+        volumeMounts:
+          - mountPath: /etc/localtime
+            name: timezone
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /etc/localtime
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-exporter
+  namespace: kube-system
+  labels:
+    k8s-app: gpu_exporter
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "GPUExporter"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9470"
+spec:
+  ports:
+  - port: 9470
+    protocol: TCP
+    targetPort: exporter
+  selector:
+    k8s-app: gpu-exporter
