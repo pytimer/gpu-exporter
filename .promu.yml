@@ -6,6 +6,7 @@ repository:
 build:
   binaries:
     - name: gpu_exporter
+  static: false
   flags: -a -tags 'netgo static_build'
   ldflags: |
     -X {{repoPath}}/main.Version={{.Version}}

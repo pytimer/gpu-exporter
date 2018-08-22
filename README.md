@@ -7,7 +7,7 @@ This is a Prometheus Exporter for Collect Nvidia GPU metrics. It uses the Nvidia
 
 ### images
 
-`docker build -t pytimer/gpu_exporter:1.0.0 .`
+`make docker`
 
 ### Pre required
 

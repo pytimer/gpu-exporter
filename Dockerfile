@@ -1,12 +1,11 @@
 FROM quay.io/prometheus/golang-builder as builder
 
-COPY ./promu /bin/promu
+RUN go get -v -u github.com/prometheus/promu
 ADD . /go/src/github.com/pytimer/gpu_exporter
 WORKDIR /go/src/github.com/pytimer/gpu_exporter
-RUN /bin/promu build -v
+RUN /go/bin/promu build -v
 
-FROM        quay.io/prometheus/busybox:glibc
-MAINTAINER  Pytimer <lixin20101023@gmail.com>
+FROM quay.io/prometheus/busybox:glibc
 
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=utility
