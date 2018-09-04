@@ -6,7 +6,7 @@ PREFIX ?= _outputs
 
 DOCKERFILE	?= Dockerfile
 DOCKER_REPO ?= pytimer
-DOCKER_IMAGE_NAME ?= gpu_exporter
+DOCKER_IMAGE_NAME ?= gpu-exporter
 DOCKER_IMAGE_TAG ?= 1.0.0
 
 PROMU := $(FIRST_GOPATH)/bin/promu

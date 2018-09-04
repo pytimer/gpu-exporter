@@ -19,7 +19,7 @@ lrwxrwxrwx 1 root root      13 Jan 14  2018 libdl.so.2 -> libdl-2.24.so
 
 ## Running
 
-`./gpu_exporter run -v 5 --logtostderr`
+`./gpu-exporter run -v 5 --logtostderr`
 
 ```
 # HELP nvidia_gpu_memory_total_mb Memory Total of the GPU device in MB

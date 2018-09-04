@@ -15,7 +15,7 @@ spec:
       hostNetwork: true
       containers:
       - name: gpu-exporterr
-        image: pytimer/gpu_exporter:1.0.0
+        image: pytimer/gpu-exporter:1.0.0
         args: [
           "run",
           "-v", "5",
@@ -39,7 +39,7 @@ metadata:
   name: gpu-exporter
   namespace: kube-system
   labels:
-    k8s-app: gpu_exporter
+    k8s-app: gpu-exporter
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "GPUExporter"
   annotations:
